@@ -38,7 +38,7 @@
 	let exercisesToView = exercises[0];
 	let selectedEntries = [];
 	$: {
-		selectedEntries = entries.filter(entry => entry.exercise === exercisesToView);
+		selectedEntries = entries.filter(entry => entry.exercise === exercisesToView).reverse();
 	}
 
 	const addExercise = () => {
