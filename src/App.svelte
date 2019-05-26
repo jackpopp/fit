@@ -2,13 +2,28 @@
 	export let name;
 	$: pie = name;
 
-	let exercises = [
+	let viewStates = {
+		home: true,
+		entries: false
+	}
+
+	let defaultExercises = [
 		'Deadlift',
 		'Bent over row',
 		'Squat'
 	];
 
+	const storedExercises = localStorage.getItem('exercises');
+	let exercises = defaultExercises;
+
+	if (storedExercises) {
+		const parsedStoredExercises = JSON.parse(storedExercises);
+		exercises = parsedStoredExercises;
+	}
+
 	let option = exercises[0];
+	
+	let newExercise = null;
 
 	let newEntries = [];
 
@@ -18,6 +33,20 @@
 
 	if (stored) {
 		entries = JSON.parse(stored);
+	}
+
+	let exercisesToView = exercises[0];
+	let selectedEntries = [];
+	$: {
+		selectedEntries = entries.filter(entry => entry.exercise === exercisesToView);
+	}
+
+	const addExercise = () => {
+		if (newExercise !== null && newExercise.length > 0) {
+			exercises = [...exercises, newExercise];
+			localStorage.setItem('exercises', JSON.stringify(exercises));
+			newExercise = null;
+		}
 	}
 
 	const addSet = () => {
@@ -61,11 +90,17 @@
 	}
 
 	const focus = (node) => node.focus();
+
+	const selectScreen = (viewState) => {
+		let newStates = viewStates;
+		Object.keys(newStates).forEach(state => newStates[state] = state === viewState);
+		viewStates = newStates;
+	}
 </script>
 
 <style>
 	* {
-		font-family: 'Mandali', sans-serif;
+		font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Fira Sans,Droid Sans,Helvetica Neue,sans-serif;
 		box-sizing: border-box;
 		line-height: 1.25;
 	}
@@ -78,18 +113,33 @@
 
 	h1,h2 {
 		margin: 0 0 10px 0;
+		font-weight: 300;
+	}
+
+	strong {
+		font-weight: 600;
 	}
 
 	.app {
-		max-width: 400px;
+		max-width: 680px;
 		width: 100%;
-		min-height: 100vh;
+		min-height: calc(100vh - 60px);
+		max-height: calc(100vh - 60px);
+		overflow: scroll;
 		height: auto;
 		margin: 0 auto;
-		border: 1px solid #005f56;
 		background: white;
 		padding: 10px;
 		border-radius: 2px;
+	}
+
+	.menu {
+		height: 60px;
+    	background: #BDBDBD;
+	}
+
+	.view {
+		margin-bottom: 10px;
 	}
 
 	label {
@@ -98,10 +148,20 @@
 	}
 
 	select {
+		width: 100%;
 		padding: 0;
-		margin: 10px 0;
+		margin: 0 0 10px 0;
 		height: 40px;
 		border-radius: 0px;
+	}
+
+	input {
+		width: 100%;
+	}
+
+	button {
+		height: 40px;
+    	padding: 10px;
 	}
 
 	.blue-button {
@@ -138,45 +198,95 @@
 <div class="main">
 	<div class="app">
 		<h1>Fit Track</h1>
-		<div>
-			<h2>Add Entry</h2>
 
-			<select bind:value={option}>
-				{#each exercises as excerise}
-					<option value={excerise}>{excerise}</option>
+		{#if viewStates.home === true}
+			<div class="view">
+				<h2>Add Entry</h2>
+
+				<select bind:value={option}>
+					{#each exercises as excerise}
+						<option value={excerise}>{excerise}</option>
+					{/each}
+				</select>
+
+				{#each newEntries as entry, i}
+					<h3>Set {i + 1}</h3>
+					{#if entry.open}
+						<label>Reps</label>
+						<input type=number bind:value={entry.reps} use:focus />
+
+						<label>Weight</label>
+						<input type=number bind:value={entry.weight}/>
+					{/if}
 				{/each}
-			</select>
 
-			{#each newEntries as entry, i}
-				<h3>Set {i + 1}</h3>
-				{#if entry.open}
-					<label>Reps</label>
-					<input type=number bind:value={entry.reps} use:focus />
+				<div>
+					<button class="blue-button" on:click={addSet}>Add Set</button>
+					<button class="green-button" on:click={addEntry}>Complete Entry</button>
+				</div>
 
-					<label>Weight</label>
-					<input type=number bind:value={entry.weight}/>
+				<h2>Add Excercise</h2>
+				<input bind:value={newExercise} />
+				<button class="green-button" on:click={addExercise}>Add Exercise</button>
+
+				{#if entries.length > 0}
+					<div>
+						<h2>Recent Entries</h2>
+						<ul>
+							{#each entries as entry, i}
+								<li>
+									<strong>Exercise:</strong> {entry.exercise} <br />
+									<strong>Avg Sets:</strong> {entry.sets.length} 
+									<strong>Reps:</strong> {createAverage(entry.sets.map(set => set.reps))} 
+									<strong>Avg Weight:</strong> {createAverage(entry.sets.map(set => set.weight))} 
+								</li>
+							{/each}
+						</ul>
+					</div>
 				{/if}
-			{/each}
 
-			<div>
-				<button class="blue-button" on:click={addSet}>Add Set</button>
-				<button class="green-button" on:click={addEntry}>Add Entry</button>
 			</div>
+		{/if}
 
-		</div>
+		{#if viewStates.entries === true}
+			<div class="view">
+				<h2>View Entries</h2>
 
-		<div>
-			<h2>Entries</h2>
-			<ul>
-				{#each entries as entry, i}
-					<li>
-						<strong>Exercise:</strong> {entry.exercise} <br />
-						<strong>Avg Sets:</strong> {entry.sets.length} 
-						<strong>Reps:</strong> {createAverage(entry.sets.map(set => set.reps))} 
-						<strong>Avg Weight:</strong> {createAverage(entry.sets.map(set => set.weight))} 
-					</li>
-				{/each}
-			</ul>
-		</div>
+				<select bind:value={exercisesToView}>
+					{#each exercises as excerise}
+						<option value={excerise}>{excerise}</option>
+					{/each}
+				</select>
+
+				{#if entries.length > 0}
+					<div>
+						<!--<h2>{exercisesToView} Entries</h2>-->
+						{#if selectedEntries.length > 0}
+						<ul>
+							{#each selectedEntries as entry, i}
+								<li>
+									<strong>Exercise:</strong> {entry.exercise} <br />
+									<strong>Avg Sets:</strong> {entry.sets.length} 
+									<strong>Reps:</strong> {createAverage(entry.sets.map(set => set.reps))} 
+									<strong>Avg Weight:</strong> {createAverage(entry.sets.map(set => set.weight))} <br />
+									<strong>Date:</strong> {entry.date}
+								</li>
+							{/each}
+						</ul>
+						{:else}
+							No entries
+						{/if}
+					</div>
+				{/if}
+			</div>
+		{/if}
+
+	</div>
+	<div class="menu">
+		{#each Object.keys(viewStates) as viewState }
+			<span on:click={() => selectScreen(viewState)}>
+				{viewState}
+			</span>
+		{/each}
 	</div>
 </div>
