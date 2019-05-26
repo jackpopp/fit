@@ -105,11 +105,24 @@
 		line-height: 1.25;
 	}
 
-	.main {
-		background: #009e8f;
-		min-height: 100vh;
-		height: auto;
+	@keyframes opacity {
+		from {
+			opacity: 0;
+		}
+
+		to {
+			opacity: 1;
+		}
 	}
+
+	.main {
+		min-height: 100vh;
+		max-height: 100vh;
+		overflow: hidden;
+		height: auto;
+		animation: opacity 0.7s ease-in;
+	}
+
 
 	h1,h2 {
 		margin: 0 0 10px 0;
@@ -147,6 +160,7 @@
 
 	.view {
 		margin-bottom: 10px;
+		animation: opacity 0.5s ease-in;
 	}
 
 	label {
