@@ -135,7 +135,14 @@
 
 	.menu {
 		height: 60px;
-    	background: #BDBDBD;
+    	background: #4DB6AC;
+	}
+
+	.menu-option {
+	    padding: 20px;
+    	display: inline-block;
+		color: white;
+		letter-spacing: 1px;
 	}
 
 	.view {
@@ -196,6 +203,13 @@
 </style>
 
 <div class="main">
+	<div class="menu">
+		{#each Object.keys(viewStates) as viewState }
+			<span class="menu-option" on:click={() => selectScreen(viewState)}>
+				{viewState[0].toUpperCase() + viewState.substr(1, viewState.length)}
+			</span>
+		{/each}
+	</div>
 	<div class="app">
 		<h1>Fit Track</h1>
 
@@ -281,12 +295,5 @@
 			</div>
 		{/if}
 
-	</div>
-	<div class="menu">
-		{#each Object.keys(viewStates) as viewState }
-			<span on:click={() => selectScreen(viewState)}>
-				{viewState}
-			</span>
-		{/each}
 	</div>
 </div>
