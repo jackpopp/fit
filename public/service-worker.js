@@ -1,6 +1,9 @@
 var CACHE_NAME = 'lift-log';
 var urlsToCache = [
   '/',
+  '/index.html',
+  '/index.html?utm_source=homescreen',
+  '/?utm_source=homescreen',
   '/*.js',
   '/*.css',
   '/*.png'
