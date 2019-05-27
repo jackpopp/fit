@@ -2,6 +2,14 @@
 
 ## TODO
 
-- add excerise
-- view by exercise
-- menu
+- add excerise done
+- view by exercise done
+- menu done
+- edit entry
+- delete entry
+- edit exercise
+- delete exerise
+- filter by date
+- input validation
+- ui
+- animation

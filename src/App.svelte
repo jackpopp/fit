@@ -2,6 +2,8 @@
 	export let name;
 	$: pie = name;
 
+	let mainHeigth = window.innerHeight;
+
 	let viewStates = {
 		home: true,
 		entries: false
@@ -216,7 +218,7 @@
 	}
 </style>
 
-<div class="main">
+<div class="main" style:height={mainHeigth}>
 	<div class="menu">
 		{#each Object.keys(viewStates) as viewState }
 			<span class="menu-option" on:click={() => selectScreen(viewState)}>
