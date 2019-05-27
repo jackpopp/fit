@@ -5,6 +5,7 @@ var urlsToCache = [
   '/*.css',
   '/*.pmg'
 ];
+const cacheWhitelist = [];
 
 self.addEventListener('install', function(event) {
   event.waitUntil(
@@ -16,6 +17,18 @@ self.addEventListener('install', function(event) {
       .catch(e => console.error(e))
   );
 });
+
+self.addEventListener('activate', function(event) {
+    event.waitUntil(
+      caches.keys().then(function(keyList) {
+        return Promise.all(keyList.map(function(key) {
+          if (cacheWhitelist.indexOf(key) === -1) {
+            return caches.delete(key);
+          }
+        }));
+      })
+    );
+  })
 
 self.addEventListener('fetch', function(event) {
     event.respondWith(
