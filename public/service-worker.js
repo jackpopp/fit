@@ -3,7 +3,7 @@ var urlsToCache = [
   '/',
   '/*.js',
   '/*.css',
-  '/*.pmg'
+  '/*.png'
 ];
 const cacheWhitelist = [];
 
