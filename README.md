@@ -1,4 +1,4 @@
-# Fit track app
+# Lift Log
 
 ## TODO
 

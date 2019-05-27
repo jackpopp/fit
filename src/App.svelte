@@ -5,8 +5,9 @@
 	let mainHeigth = window.innerHeight;
 
 	let viewStates = {
-		home: true,
-		entries: false
+		'home': true,
+		'entries': false,
+		'exercises': false
 	}
 
 	let defaultExercises = [
@@ -52,17 +53,21 @@
 	}
 
 	const addSet = () => {
+		// get last and use it for the new values
+		const last = newEntries[newEntries.length - 1];
 
-		// get prev and use it for the new values
-		const prev = newEntries[newEntries.length - 1];
+		if (last && (parseInt(last.reps) > 0 === false || parseInt(last.weight) > 0 === false)) {
+			alert('Make sure reps and weight are over 0');
+			return;
+		}
 
-		if (prev) {
-			newEntries[newEntries.length - 1].open = false;
+		if (last) {
+			last.open = false;
 		}
 
 		newEntries = [...newEntries, {
-			reps: prev ? prev.reps : null,
-			weight: prev ? prev.weight : null,
+			reps: last ? last.reps : null,
+			weight: last ? last.weight : null,
 			open: true
 		}];
 	}
@@ -77,13 +82,15 @@
 		}
 		entries = [...entries, entry];
 
-		newEntries = [{
-			reps: null,
-			weight: null,
-			open: false
-		}];
+		newEntries = [];
 
 		localStorage.setItem('entries', JSON.stringify(entries));
+	}
+
+	const deleteEntry = (entry) => {
+		console.log(entries.indexOf(entry));
+		//entries = entries.splice(entries.indexOf(entry), 1);
+		//localStorage.setItem('entries', JSON.stringify(entries));
 	}
 
 	const createAverage = (amounts = []) => {
@@ -118,8 +125,8 @@
 	}
 
 	.main {
-		min-height: 100vh;
-		max-height: 100vh;
+		/*min-height: 100vh;
+		max-height: 100vh;*/
 		overflow: hidden;
 		height: auto;
 		animation: opacity 0.7s ease-in;
@@ -138,8 +145,8 @@
 	.app {
 		max-width: 680px;
 		width: 100%;
-		min-height: calc(100vh - 60px);
-		max-height: calc(100vh - 60px);
+		min-height: calc(100% - 60px);
+		max-height: calc(100% - 60px);
 		overflow: scroll;
 		height: auto;
 		margin: 0 auto;
@@ -158,6 +165,10 @@
     	display: inline-block;
 		color: white;
 		letter-spacing: 1px;
+	}
+
+	.menu-selected {
+		color: #212121;
 	}
 
 	.view {
@@ -218,10 +229,10 @@
 	}
 </style>
 
-<div class="main" style:height={mainHeigth}>
+<div class="main" style="height:{mainHeigth}px">
 	<div class="menu">
 		{#each Object.keys(viewStates) as viewState }
-			<span class="menu-option" on:click={() => selectScreen(viewState)}>
+			<span class="menu-option {viewStates[viewState] ? 'menu-selected' : null}" on:click={() => selectScreen(viewState)}>
 				{viewState[0].toUpperCase() + viewState.substr(1, viewState.length)}
 			</span>
 		{/each}
@@ -255,10 +266,6 @@
 					<button class="green-button" on:click={addEntry}>Complete Entry</button>
 				</div>
 
-				<h2>Add Excercise</h2>
-				<input bind:value={newExercise} />
-				<button class="green-button" on:click={addExercise}>Add Exercise</button>
-
 				{#if entries.length > 0}
 					<div>
 						<h2>Recent Entries</h2>
@@ -275,6 +282,21 @@
 					</div>
 				{/if}
 
+			</div>
+		{/if}
+
+		{#if viewStates.exercises === true}
+			<div class="view">
+				<h2>Add Excercise</h2>
+				<input bind:value={newExercise} />
+				<button class="green-button" on:click={addExercise}>Add Exercise</button>
+
+				<h2>Exercises</h2>
+				<ul>
+				{#each exercises as excerise}
+					<li>{excerise}</li>
+				{/each}
+				</ul>
 			</div>
 		{/if}
 
@@ -300,6 +322,7 @@
 									<strong>Reps:</strong> {createAverage(entry.sets.map(set => set.reps))} 
 									<strong>Avg Weight:</strong> {createAverage(entry.sets.map(set => set.weight))} <br />
 									<strong>Date:</strong> {entry.date}
+									<strong on:click={() => deleteEntry(entry)}>Delete</strong>
 								</li>
 							{/each}
 						</ul>
