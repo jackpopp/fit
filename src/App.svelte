@@ -160,8 +160,14 @@
     	background: #4DB6AC;
 	}
 
+	.logo {
+		margin: 20px 10px;
+		color: white;
+    	font-weight: 600;
+	}
+
 	.menu-option {
-	    padding: 20px;
+	    margin: 20px 10px;
     	display: inline-block;
 		color: white;
 		letter-spacing: 1px;
@@ -174,6 +180,10 @@
 	.view {
 		margin-bottom: 10px;
 		animation: opacity 0.5s ease-in;
+	}
+
+	.section {
+		margin-top: 30px;
 	}
 
 	label {
@@ -231,6 +241,7 @@
 
 <div class="main" style="height:{mainHeigth}px">
 	<div class="menu">
+		<span class="logo">Lift Log</span>
 		{#each Object.keys(viewStates) as viewState }
 			<span class="menu-option {viewStates[viewState] ? 'menu-selected' : null}" on:click={() => selectScreen(viewState)}>
 				{viewState[0].toUpperCase() + viewState.substr(1, viewState.length)}
@@ -238,8 +249,6 @@
 		{/each}
 	</div>
 	<div class="app">
-		<h1>Fit Track</h1>
-
 		{#if viewStates.home === true}
 			<div class="view">
 				<h2>Add Entry</h2>
@@ -267,7 +276,7 @@
 				</div>
 
 				{#if entries.length > 0}
-					<div>
+					<div class="section">
 						<h2>Recent Entries</h2>
 						<ul>
 							{#each entries as entry, i}
