@@ -35,10 +35,16 @@
 	const stored = localStorage.getItem('entries');
 
 	if (stored) {
-		entries = JSON.parse(stored);
+		entries = JSON.parse(stored).map(value => {
+			value.open = false;
+			return value;
+		});
 	}
 
 	let exercisesToView = exercises[0];
+
+	$: latestEntries = JSON.parse(JSON.stringify(entries)).reverse().slice(0, 5);
+
 	let selectedEntries = [];
 	$: {
 		selectedEntries = entries.filter(entry => entry.exercise === exercisesToView).reverse();
@@ -88,9 +94,9 @@
 	}
 
 	const deleteEntry = (entry) => {
-		console.log(entries.indexOf(entry));
-		//entries = entries.splice(entries.indexOf(entry), 1);
-		//localStorage.setItem('entries', JSON.stringify(entries));
+		entries.splice(entries.indexOf(entry), 1);
+		entries = entries;
+		localStorage.setItem('entries', JSON.stringify(entries));
 	}
 
 	const createAverage = (amounts = []) => {
@@ -104,6 +110,19 @@
 		let newStates = viewStates;
 		Object.keys(newStates).forEach(state => newStates[state] = state === viewState);
 		viewStates = newStates;
+	}
+
+	const formatDate = (dateString) => {
+		const date = new Date(dateString);
+		const year = date.getFullYear();
+
+		let month = date.getMonth() + 1;
+		month = month < 10 ? `0${month}` : month;
+
+		const day = date.getDate();
+		return `${day}-${month}-${year}`;
+
+		return dateString;
 	}
 </script>
 
@@ -220,22 +239,40 @@
 		color: white;
 	}
 
+	.red-button {
+		background: #d32f2f;
+		border: none;
+		color: white;
+	}
+
 	ul {
 		padding: 0;
 		margin-bottom: 0;
 	}
 
 	li {
+		background: #efefef;
+		padding: 8px;
+		border-radius: 3px;
 		list-style-type: none;
-		border-bottom: 1px solid black;
 		margin: 0 0 8px 0;
-		padding: 0 0 8px 0;
+		color: #439c94;
 	}
 
-	li:last-child {
-		border-bottom: 0;
-		margin: 0;
-		padding: 0;
+	li strong {
+		color: #313131;
+	}
+
+	.row {
+		margin: 6px 0;
+	}
+
+	.row:first-child {
+		margin: 0 0 6px 0;
+	}
+
+	.row:last-child {
+		margin: 6px 0 0 0;
 	}
 </style>
 
@@ -271,20 +308,24 @@
 				{/each}
 
 				<div>
-					<button class="blue-button" on:click={addSet}>Add Set</button>
 					<button class="green-button" on:click={addEntry}>Complete Entry</button>
+					<button class="blue-button" on:click={addSet}>Add Set</button>
 				</div>
 
-				{#if entries.length > 0}
+				{#if latestEntries.length > 0}
 					<div class="section">
 						<h2>Recent Entries</h2>
 						<ul>
-							{#each entries as entry, i}
+							{#each latestEntries as entry, i}
 								<li>
-									<strong>Exercise:</strong> {entry.exercise} <br />
-									<strong>Avg Sets:</strong> {entry.sets.length} 
-									<strong>Reps:</strong> {createAverage(entry.sets.map(set => set.reps))} 
-									<strong>Avg Weight:</strong> {createAverage(entry.sets.map(set => set.weight))} 
+									<div class="row">
+										{entry.exercise}
+									</div>
+									<div class="row">
+										<strong>Sets</strong> {entry.sets.length} 
+										<strong>Avg Reps</strong> {createAverage(entry.sets.map(set => set.reps))} 
+										<strong>Avg Weight</strong> {createAverage(entry.sets.map(set => set.weight))} 
+									</div>
 								</li>
 							{/each}
 						</ul>
@@ -326,12 +367,17 @@
 						<ul>
 							{#each selectedEntries as entry, i}
 								<li>
-									<strong>Exercise:</strong> {entry.exercise} <br />
-									<strong>Avg Sets:</strong> {entry.sets.length} 
-									<strong>Reps:</strong> {createAverage(entry.sets.map(set => set.reps))} 
-									<strong>Avg Weight:</strong> {createAverage(entry.sets.map(set => set.weight))} <br />
-									<strong>Date:</strong> {entry.date}
-									<strong on:click={() => deleteEntry(entry)}>Delete</strong>
+									<div class="row">
+										<strong>Sets</strong> {entry.sets.length} 
+										<strong>Avg Reps</strong> {createAverage(entry.sets.map(set => set.reps))} 
+										<strong>Avg Weight</strong> {createAverage(entry.sets.map(set => set.weight))}
+									</div>
+									<div class="row">
+										<strong>Added</strong> {formatDate(entry.date)}
+									</div>
+									<div class="row">
+										<button class="red-button" on:click={() => deleteEntry(entry)}>Remove</button>
+									</div>
 								</li>
 							{/each}
 						</ul>
